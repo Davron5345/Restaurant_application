@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
     const address = formData.get("address") as string;
     const accountant = formData.get("accountant") as string;
     const accountantPhone = formData.get("accountantPhone") as string;
+    const tgChatId = formData.get("tgChatId") as string;
 
     await prisma.supplier.create({
       data: { 
@@ -54,6 +55,7 @@ export async function POST(req: NextRequest) {
         address: address?.trim() || null,
         accountant: accountant?.trim() || null,
         accountantPhone: accountantPhone?.trim() || null,
+        tgChatId: tgChatId?.trim() || null,
       }
     });
 

@@ -46,6 +46,10 @@ export default async function AdminSuppliersPage() {
                       <input name="phone" placeholder="+998" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0", boxSizing: "border-box" }} />
                     </div>
                     <div>
+                      <label style={{ display: "block", fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>Telegram Chat ID</label>
+                      <input name="tgChatId" placeholder="-100123456789" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0", boxSizing: "border-box" }} />
+                    </div>
+                    <div>
                       <label style={{ display: "block", fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>Банк</label>
                       <input name="bank" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0", boxSizing: "border-box" }} />
                     </div>

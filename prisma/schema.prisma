@@ -36,6 +36,7 @@ model Supplier {
   address         String?
   accountant      String?
   accountantPhone String?
+  tgChatId        String?
   currency        String   @default("UZS") // "UZS" или "USD"
   transactions    Transaction[]
   isActive        Boolean  @default(true)

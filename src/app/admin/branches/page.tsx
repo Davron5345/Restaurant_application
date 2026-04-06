@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
 import Modal from "@/components/Modal";
+import ImageUploader from "@/components/ImageUploader";
 
 const prisma = new PrismaClient();
 export const dynamic = "force-dynamic";
@@ -74,8 +75,7 @@ export default async function AdminBranchesPage({ searchParams }: { searchParams
                               <input name="name" defaultValue={b.name} required style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #e2e8f0", boxSizing: "border-box" }} />
                             </div>
                             <div>
-                              <label style={{ display: "block", fontSize: "12px", color: "#64748b", marginBottom: "4px" }}>Логотип (URL)</label>
-                              <input name="logo" defaultValue={b.logo || ""} placeholder="https://..." style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #e2e8f0", boxSizing: "border-box" }} />
+                              <ImageUploader defaultImage={b.logo || ""} name="logo" />
                             </div>
                             <div>
                               <label style={{ display: "block", fontSize: "12px", color: "#64748b", marginBottom: "4px" }}>Telegram Chat ID</label>

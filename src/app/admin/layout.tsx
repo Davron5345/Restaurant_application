@@ -48,10 +48,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
         
-        <div style={{ padding: "16px", borderTop: "1px solid #e2e8f0" }}>
-          <Link href="/" style={{ textDecoration: "none", color: "#64748b", display: "flex", alignItems: "center", gap: "8px" }}>
+        <div style={{ padding: "16px", borderTop: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "12px" }}>
+          <Link href="/" style={{ textDecoration: "none", color: "#64748b", display: "flex", alignItems: "center", gap: "8px", fontWeight: "500" }}>
             <span>⬅️</span> В кассу
           </Link>
+          <form action="/api/auth/logout" method="POST">
+             <button type="submit" style={{ width: "100%", background: "#fee2e2", color: "#dc2626", border: "none", padding: "10px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+               <span>🚪</span> Выйти
+             </button>
+          </form>
         </div>
       </aside>
 

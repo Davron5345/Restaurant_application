@@ -1,12 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CashRegisterApp() {
   const [step, setStep] = useState<1 | 2>(1);
   const [date, setDate] = useState("");
   const [startBalance, setStartBalance] = useState("0");
   const [endBalance, setEndBalance] = useState("0");
+  const router = useRouter();
+
+  useEffect(() => {
+    // Set default date to today
+    const today = new Date();
+    const formatted = today.toISOString().split("T")[0];
+    setDate(formatted);
+  }, []);
 
   const [incomes, setIncomes] = useState([
     { id: 1, article: "Излишка", partner: "", amount: "", comment: "" },
@@ -17,14 +26,34 @@ export default function CashRegisterApp() {
 
   const [expenses, setExpenses] = useState([
     { id: 1, article: "Недостача", partner: "", amount: "", comment: "" },
-    { id: 2, article: "Дивидент хужайинларга", partner: "", amount: "", comment: "" },
+    { id: 2, article: "А.Т. ойлик", partner: "", amount: "", comment: "" },
     { id: 3, article: "Сумма на конец", partner: "", amount: "", comment: "" },
     { id: 4, article: "", partner: "", amount: "", comment: "" },
   ]);
 
-  // Mock total calculation
-  const totalIncome = incomes.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-  const totalExpense = expenses.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+  const parseNum = (str: string) => {
+    if (!str) return 0;
+    return parseFloat(str.replace(/\s+/g, '').replace(',', '.')) || 0;
+  };
+
+  const formatNum = (val: string | number) => {
+    if (!val) return "";
+    let str = val.toString().replace(/\s+/g, '').replace('.', ',');
+    let parts = str.split(',');
+    let intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return parts[1] ? `${intPart},${parts[1]}` : intPart;
+  };
+
+  const totalIncome = incomes.reduce((sum, item) => sum + parseNum(item.amount), 0);
+  const totalExpense = expenses.reduce((sum, item) => sum + parseNum(item.amount), 0);
+
+  const handleAmountChange = (arr: any[], setArr: any, idx: number, value: string) => {
+    // Only allow digits and comma
+    const rawValue = value.replace(/[^\d,]/g, '');
+    const newArr = [...arr];
+    newArr[idx].amount = formatNum(rawValue);
+    setArr(newArr);
+  };
 
   const addIncomeRow = () => {
     setIncomes([...incomes, { id: Date.now(), article: "", partner: "", amount: "", comment: "" }]);
@@ -46,17 +75,41 @@ export default function CashRegisterApp() {
     }
   };
 
+  const handleSave = async () => {
+    try {
+      const res = await fetch("/api/transactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date,
+          incomes,
+          expenses
+        })
+      });
+
+      if (res.ok) {
+        alert("Записано успешно!");
+        window.location.reload();
+      } else {
+        const err = await res.json();
+        alert("Ошибка: " + err.error);
+      }
+    } catch (e) {
+      alert("Ошибка соединения");
+    }
+  };
+
   return (
     <>
       <header className="header">
         <div className="header-balances">
           <div className="balance-card">
             <span>MAHALLA 90 СНН:</span>
-            <strong>{startBalance} ₸</strong>
+            <strong>{formatNum(startBalance)} сум</strong>
           </div>
           <div className="balance-card">
             <span>СНК:</span>
-            <strong>{endBalance} ₸</strong>
+            <strong>{formatNum(endBalance)} сум</strong>
           </div>
           <div>
             <input 
@@ -68,7 +121,7 @@ export default function CashRegisterApp() {
           </div>
         </div>
 
-        <div className="stepper">
+        <div className="stepper" style={{display: 'flex', gap: '8px'}}>
           <button 
             className={`step-btn ${step === 1 ? 'active' : ''}`}
             onClick={() => setStep(1)}
@@ -83,8 +136,8 @@ export default function CashRegisterApp() {
           </button>
           <button 
             className="step-btn"
-            style={{ marginLeft: '12px', background: '#10b981', color: 'white' }}
-            onClick={() => alert("Здесь будет сохранение в базу")}
+            style={{ marginLeft: '12px', background: '#10b981', color: 'white', fontWeight: 'bold' }}
+            onClick={handleSave}
           >
             Записать
           </button>
@@ -140,14 +193,10 @@ export default function CashRegisterApp() {
                     </td>
                     <td>
                       <input 
-                        type="number" 
+                        type="text" 
                         placeholder="0"
                         value={item.amount}
-                        onChange={(e) => {
-                          const newArr = [...incomes];
-                          newArr[idx].amount = e.target.value;
-                          setIncomes(newArr);
-                        }}
+                        onChange={(e) => handleAmountChange(incomes, setIncomes, idx, e.target.value)}
                       />
                     </td>
                     <td>
@@ -181,7 +230,7 @@ export default function CashRegisterApp() {
             </div>
             
             <div className="totals-bar">
-              Итого приход: <span className="totals-value">{totalIncome.toLocaleString()}</span>
+              Итого приход: <span className="totals-value">{formatNum(totalIncome)} сум</span>
             </div>
           </div>
         )}
@@ -234,16 +283,12 @@ export default function CashRegisterApp() {
                       />
                     </td>
                     <td>
-                      <input 
-                        type="number" 
-                        placeholder="0"
-                        value={item.amount}
-                        onChange={(e) => {
-                          const newArr = [...expenses];
-                          newArr[idx].amount = e.target.value;
-                          setExpenses(newArr);
-                        }}
-                      />
+                        <input 
+                          type="text" 
+                          placeholder="0"
+                          value={item.amount}
+                          onChange={(e) => handleAmountChange(expenses, setExpenses, idx, e.target.value)}
+                        />
                     </td>
                     <td>
                       <input 
@@ -276,7 +321,7 @@ export default function CashRegisterApp() {
             </div>
             
             <div className="totals-bar">
-              Итого расход: <span className="totals-value">{totalExpense.toLocaleString()}</span>
+              Итого расход: <span className="totals-value">{formatNum(totalExpense)} сум</span>
             </div>
           </div>
         )}

@@ -9,7 +9,24 @@ export default async function AdminCategoriesPage() {
   const token = cookieStore.get("auth_token")?.value;
   if (!token) return <div>Доступ запрещен</div>;
 
-  const categories = await prisma.category.findMany({ orderBy: { type: "asc" } });
+  let categories = await prisma.category.findMany({ orderBy: { type: "asc" } });
+
+  if (categories.length === 0) {
+    await prisma.category.createMany({
+      data: [
+        { name: "Излишка", type: "INCOME" },
+        { name: "Савдо сотилган овкатдан", type: "INCOME" },
+        { name: "Сумма на начало", type: "INCOME" },
+        { name: "Прочее", type: "INCOME" },
+        { name: "Недостача", type: "EXPENSE" },
+        { name: "А.Т. ойлик", type: "EXPENSE" },
+        { name: "Терминал", type: "EXPENSE" },
+        { name: "Сумма на конец", type: "EXPENSE" },
+        { name: "Поставщики", type: "EXPENSE" },
+      ]
+    });
+    categories = await prisma.category.findMany({ orderBy: { type: "asc" } });
+  }
 
   return (
     <div>

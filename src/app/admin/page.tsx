@@ -15,15 +15,24 @@ export default async function AdminReportsPage() {
   const transactions = await prisma.transaction.findMany({
     orderBy: { date: "desc" },
     take: 100, // Последние 100
+    include: { branch: true }
   });
+
+  const branches = await prisma.branch.findMany({ orderBy: { name: "asc" } });
 
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <h1 style={{ fontSize: "2rem", color: "#1e293b", margin: 0 }}>Ежедневные отчёты</h1>
-        <div style={{ display: "flex", gap: "12px" }}>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <select style={{ padding: "8px 12px", border: "1px solid #e2e8f0", borderRadius: "8px", background: "white" }}>
+            <option value="">Все филиалы</option>
+            {branches.map((b: any) => (
+              <option key={b.id} value={b.id}>{b.name}</option>
+            ))}
+          </select>
           <input type="date" style={{ padding: "8px 12px", border: "1px solid #e2e8f0", borderRadius: "8px" }} />
-          <button style={{ background: "#f8fafc", border: "1px solid #e2e8f0", padding: "8px 16px", borderRadius: "8px", cursor: "pointer" }}>Фильтр</button>
+          <button style={{ background: "#2563eb", color: "white", border: "none", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}>Показать</button>
         </div>
       </div>
 

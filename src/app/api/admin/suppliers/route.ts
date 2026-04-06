@@ -20,14 +20,19 @@ export async function POST(req: NextRequest) {
     const currency = formData.get("currency") as string;
 
     if (!name || name.trim() === "") {
-        return NextResponse.redirect(new URL("/admin/suppliers?error=invalid", req.url));
+        const errUrl = req.nextUrl.clone();
+        errUrl.pathname = "/admin/suppliers";
+        errUrl.searchParams.set("error", "invalid");
+        return NextResponse.redirect(errUrl);
     }
 
     await prisma.supplier.create({
       data: { name: name.trim(), currency: currency || "UZS" }
     });
 
-    return NextResponse.redirect(new URL("/admin/suppliers", req.url));
+    const successUrl = req.nextUrl.clone();
+    successUrl.pathname = "/admin/suppliers";
+    return NextResponse.redirect(successUrl);
   } catch (error) {
     return NextResponse.json({ error: "Error" }, { status: 500 });
   }

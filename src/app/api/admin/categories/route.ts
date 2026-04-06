@@ -20,14 +20,19 @@ export async function POST(req: NextRequest) {
     const type = formData.get("type") as string;
 
     if (!name || name.trim() === "") {
-        return NextResponse.redirect(new URL("/admin/categories?error=invalid", req.url));
+        const errUrl = req.nextUrl.clone();
+        errUrl.pathname = "/admin/categories";
+        errUrl.searchParams.set("error", "invalid");
+        return NextResponse.redirect(errUrl);
     }
 
     await prisma.category.create({
       data: { name: name.trim(), type: type }
     });
 
-    return NextResponse.redirect(new URL("/admin/categories", req.url));
+    const successUrl = req.nextUrl.clone();
+    successUrl.pathname = "/admin/categories";
+    return NextResponse.redirect(successUrl);
   } catch (error) {
     return NextResponse.json({ error: "Error" }, { status: 500 });
   }

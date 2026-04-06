@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  date      DateTime // Дата проведения операции
+  type      String   // "INCOME" (Приход) или "EXPENSE" (Расход)
+  article   String   // Статья операции: "Терминал", "Поставщики", "А.Т. ойлик" и т.д.
+  partner   String?  // От кого / Кому (может быть пустым)
+  amount    Float    // Сумма
+  comment   String?  // Комментарии
+  restaurant String  @default("Махалла 90") // Для привязки к ресторану
+  createdAt DateTime @default(now())
+}
+
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  currency  String   @default("UZS") // "UZS" или "USD"
+  isActive  Boolean  @default(true)
+}
+
+model Bank {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // "INCOME" или "EXPENSE"
+  isActive  Boolean  @default(true)
+
+  @@unique([name, type])
+}

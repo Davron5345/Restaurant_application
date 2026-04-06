@@ -33,6 +33,11 @@ export default async function AdminUsersPage() {
              <Modal title="Зарегистрировать сотрудника" triggerText="+ Добавить">
                   <form action="/api/admin/users" method="POST" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                     <div>
+                      <label style={{ display: "block", fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>ФИО сотрудника</label>
+                      <input name="name" placeholder="Иванов Иван" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0", boxSizing: "border-box" }} required />
+                    </div>
+
+                    <div>
                       <label style={{ display: "block", fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>Номер телефона</label>
                       <input name="phone" defaultValue="+998 " style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0", boxSizing: "border-box" }} required />
                     </div>
@@ -76,6 +81,7 @@ export default async function AdminUsersPage() {
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#f1f5f9", textAlign: "left" }}>
+                <th style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", color: "#64748b" }}>ФИО</th>
                 <th style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", color: "#64748b" }}>Телефон</th>
                 <th style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", color: "#64748b" }}>Должность</th>
                 <th style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", color: "#64748b" }}>Филиалы</th>
@@ -85,7 +91,8 @@ export default async function AdminUsersPage() {
             <tbody>
               {users.map((u: any) => (
                 <tr key={u.id}>
-                  <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", fontWeight: "600" }}>{u.phone}</td>
+                  <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", fontWeight: "600" }}>{u.name || "-"}</td>
+                  <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{u.phone}</td>
                   <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{u.role}</td>
                   <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{u.branches?.length > 0 ? u.branches.map((b: any) => b.name).join(", ") : "Все филиалы"}</td>
                   <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>

@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     const formData = await req.formData();
+    const name = formData.get("name") as string;
     const phoneNum = formData.get("phone") as string;
     const role = formData.get("role") as string;
     const branchIds = formData.getAll("branchIds") as string[];
@@ -38,11 +39,13 @@ export async function POST(req: NextRequest) {
     await prisma.user.upsert({
       where: { phone: cleanPhone },
       update: { 
+        name: name?.trim() || null,
         password: passwordHash, 
         role, 
         branches: { set: branchConnections } 
       },
       create: {
+        name: name?.trim() || null,
         phone: cleanPhone,
         password: passwordHash,
         role: role || "CASHIER",

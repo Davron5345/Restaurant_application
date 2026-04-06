@@ -15,9 +15,11 @@ model Transaction {
   partner   String?  // От кого / Кому (может быть пустым)
   amount    Float    // Сумма
   comment   String?  // Комментарии
-  restaurant String  @default("Махалла 90") // Для привязки к ресторану
+  branchId  String?
+  branch    Branch?  @relation(fields: [branchId], references: [id])
   createdAt DateTime @default(now())
 }
+
 
 model Supplier {
   id        String   @id @default(cuid())
@@ -45,8 +47,17 @@ model User {
   id        String   @id @default(cuid())
   phone     String   @unique
   password  String
-  role      String   @default("CASHIER") // "ADMIN" или "CASHIER"
+  role      String   @default("CASHIER") // Роли: ADMIN, CASHIER, FOUNDER...
+  branchId  String?
+  branch    Branch?  @relation(fields: [branchId], references: [id])
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 }
 
+model Branch {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  users       User[]
+  transactions Transaction[]
+  isActive    Boolean  @default(true)
+}

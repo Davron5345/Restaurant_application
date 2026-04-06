@@ -4,11 +4,19 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("+998 ");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+    if (!val.startsWith("+998 ")) {
+      val = "+998 ";
+    }
+    setPhone(val);
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +32,7 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Ошибка авторизации");
       
-      if (data.role === "ADMIN") router.push("/admin");
+      if (data.role === "ADMIN" || data.role === "FOUNDER" || data.role === "MANAGER") router.push("/admin");
       else router.push("/");
     } catch (err: any) {
       setError(err.message);
@@ -53,9 +61,9 @@ export default function LoginPage() {
             </label>
             <input
               type="text"
-              placeholder="998901234567"
+              placeholder="+998 90 123 45 67"
               value={phone}
-              onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
+              onChange={handlePhoneChange}
               style={{ width: '100%', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#f8fafc', fontSize: '16px', boxSizing: 'border-box' }}
               required
             />
@@ -67,7 +75,7 @@ export default function LoginPage() {
             </label>
             <input
               type="password"
-              placeholder="Последние 4 цифры"
+              placeholder="Последние 4 цифры (напр. 4567)"
               value={password}
               onChange={e => setPassword(e.target.value)}
               style={{ width: '100%', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#f8fafc', fontSize: '16px', boxSizing: 'border-box' }}

@@ -48,8 +48,7 @@ model User {
   phone     String   @unique
   password  String
   role      String   @default("CASHIER") // Роли: ADMIN, CASHIER, FOUNDER...
-  branchId  String?
-  branch    Branch?  @relation(fields: [branchId], references: [id])
+  branches  Branch[] @relation("UserBranches")
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 }
@@ -57,7 +56,10 @@ model User {
 model Branch {
   id          String   @id @default(cuid())
   name        String   @unique
-  users       User[]
+  logo        String?
+  tgChatId    String?
+  tgBotToken  String?
+  users       User[]   @relation("UserBranches")
   transactions Transaction[]
   isActive    Boolean  @default(true)
 }

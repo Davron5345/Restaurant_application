@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const phoneNum = formData.get("phone") as string;
     const role = formData.get("role") as string;
-    const branchId = formData.get("branchId") as string;
+    const branchIds = formData.getAll("branchIds") as string[];
 
     if (!phoneNum || phoneNum.length < 4) {
       return NextResponse.json({ error: "Invalid phone" }, { status: 400 });
@@ -33,14 +33,20 @@ export async function POST(req: NextRequest) {
     const generatedPassword = cleanPhone.slice(-4);
     const passwordHash = await bcrypt.hash(generatedPassword, 10);
 
+    const branchConnections = branchIds.filter(id => id.trim() !== "").map(id => ({ id }));
+
     await prisma.user.upsert({
       where: { phone: cleanPhone },
-      update: { password: passwordHash, role, branchId: branchId || null },
+      update: { 
+        password: passwordHash, 
+        role, 
+        branches: { set: branchConnections } 
+      },
       create: {
         phone: cleanPhone,
         password: passwordHash,
         role: role || "CASHIER",
-        branchId: branchId || null,
+        branches: { connect: branchConnections }
       }
     });
 

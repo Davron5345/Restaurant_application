@@ -9,7 +9,8 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   // Authorization check (Double check server-side)
-  const token = cookies().get("auth_token")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token")?.value;
   if (!token) return <div>Доступ запрещен</div>;
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);

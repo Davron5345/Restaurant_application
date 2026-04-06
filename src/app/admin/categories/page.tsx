@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
+import Modal from "@/components/Modal";
 
 const prisma = new PrismaClient();
 export const dynamic = "force-dynamic";
@@ -60,25 +61,24 @@ export default async function AdminCategoriesPage() {
           </table>
         </div>
 
-        <div style={{ flex: 1, background: "white", padding: "24px", borderRadius: "12px", boxShadow: "0 2px 4px rgba(0,0,0,0.05)", alignSelf: "flex-start" }}>
-          <h2 style={{ fontSize: "1.25rem", marginBottom: "16px", color: "#1e293b" }}>Добавить статью</h2>
-          <form action="/api/admin/categories" method="POST" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <div>
-              <label style={{ display: "block", fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>Тип</label>
-              <select name="type" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0", boxSizing: "border-box" }}>
-                <option value="INCOME">Приход</option>
-                <option value="EXPENSE">Расход</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ display: "block", fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>Название статьи</label>
-              <input name="name" placeholder="Например: Коммуналка" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0", boxSizing: "border-box" }} required />
-            </div>
-            <button type="submit" style={{ background: "#2563eb", color: "white", padding: "12px", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>
-              Сохранить
-            </button>
-          </form>
-        </div>
+             <Modal title="Добавить статью" triggerText="+ Добавить">
+                  <form action="/api/admin/categories" method="POST" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>Тип</label>
+                      <select name="type" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0", boxSizing: "border-box" }}>
+                        <option value="INCOME">Приход</option>
+                        <option value="EXPENSE">Расход</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>Название статьи</label>
+                      <input name="name" placeholder="Например: Коммуналка" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0", boxSizing: "border-box" }} required />
+                    </div>
+                    <button type="submit" style={{ background: "#2563eb", color: "white", padding: "12px", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", marginTop: "8px" }}>
+                      Сохранить
+                    </button>
+                  </form>
+             </Modal>
 
       </div>
     </div>

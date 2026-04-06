@@ -16,16 +16,29 @@ model Transaction {
   amount    Float    // Сумма
   comment   String?  // Комментарии
   branchId  String?
-  branch    Branch?  @relation(fields: [branchId], references: [id])
-  createdAt DateTime @default(now())
+  branch    Branch?   @relation(fields: [branchId], references: [id])
+  supplierId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id])
+  createdAt DateTime  @default(now())
 }
 
 
 model Supplier {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  currency  String   @default("UZS") // "UZS" или "USD"
-  isActive  Boolean  @default(true)
+  id              String   @id @default(cuid())
+  name            String   @unique
+  inn             String?
+  director        String?
+  phone           String?
+  rs              String?
+  mfo             String?
+  bankAddress     String?
+  bank            String?
+  address         String?
+  accountant      String?
+  accountantPhone String?
+  currency        String   @default("UZS") // "UZS" или "USD"
+  transactions    Transaction[]
+  isActive        Boolean  @default(true)
 }
 
 model Bank {

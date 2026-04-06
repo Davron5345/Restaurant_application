@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
+import Modal from "@/components/Modal";
 
 const prisma = new PrismaClient();
 export const dynamic = "force-dynamic";
@@ -33,21 +34,17 @@ export default async function AdminBranchesPage({ searchParams }: { searchParams
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
              <h2 style={{ fontSize: "1.25rem", color: "#1e293b", margin: 0 }}>Список филиалов</h2>
              
-             {/* Hidden adding form inside details */}
-             <details style={{ position: "relative" }}>
-               <summary style={{ background: "#2563eb", color: "white", padding: "10px 16px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", listStyle: "none" }}>+ Добавить</summary>
-               <div style={{ position: "absolute", right: 0, top: "100%", marginTop: "8px", background: "white", padding: "24px", borderRadius: "12px", boxShadow: "0 10px 15px rgba(0,0,0,0.1)", border: "1px solid #e2e8f0", zIndex: 10, width: "320px" }}>
+             <Modal title="Добавить филиал" triggerText="+ Добавить">
                   <form action="/api/admin/branches" method="POST" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                     <div>
                       <label style={{ display: "block", fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>Название</label>
                       <input name="name" placeholder="Например: Махалла 90 (Центр)" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0", boxSizing: "border-box" }} required />
                     </div>
-                    <button type="submit" style={{ background: "#2563eb", color: "white", padding: "12px", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>
+                    <button type="submit" style={{ background: "#2563eb", color: "white", padding: "12px", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", marginTop: "8px" }}>
                       Сохранить
                     </button>
                   </form>
-               </div>
-             </details>
+             </Modal>
           </div>
 
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -69,10 +66,8 @@ export default async function AdminBranchesPage({ searchParams }: { searchParams
                     <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{b._count.transactions}</td>
                     <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", display: "flex", gap: "8px" }}>
                       
-                      <details style={{ position: "relative" }}>
-                        <summary style={{ background: "#f1f5f9", color: "#475569", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "bold", listStyle: "none" }}>Настройки</summary>
-                        <div style={{ position: "absolute", right: 0, top: "100%", marginTop: "8px", background: "white", padding: "20px", borderRadius: "8px", boxShadow: "0 10px 15px rgba(0,0,0,0.1)", border: "1px solid #e2e8f0", zIndex: 10, width: "300px" }}>
-                          <form action="/api/admin/branches/update" method="POST" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <Modal title="Настройки филиала" triggerText="Настройки" triggerStyle="secondary">
+                          <form action="/api/admin/branches/update" method="POST" style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", minWidth: "250px" }}>
                             <input type="hidden" name="id" value={b.id} />
                             <div>
                               <label style={{ display: "block", fontSize: "12px", color: "#64748b", marginBottom: "4px" }}>Название</label>
@@ -92,8 +87,7 @@ export default async function AdminBranchesPage({ searchParams }: { searchParams
                             </div>
                             <button type="submit" style={{ background: "#2563eb", color: "white", padding: "8px", border: "none", borderRadius: "6px", fontWeight: "bold", cursor: "pointer", marginTop: "4px" }}>Сохранить</button>
                           </form>
-                        </div>
-                      </details>
+                      </Modal>
 
                       <form action="/api/admin/branches/delete" method="POST">
                         <input type="hidden" name="id" value={b.id} />

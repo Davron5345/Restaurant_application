@@ -21,16 +21,40 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const name = formData.get("name") as string;
-    const currency = formData.get("currency") as string;
-
+    
     if (!name || name.trim() === "") {
         const errUrl = new URL("/admin/suppliers", baseUrl);
         errUrl.searchParams.set("error", "invalid");
         return NextResponse.redirect(errUrl);
     }
 
+    const currency = formData.get("currency") as string;
+    const inn = formData.get("inn") as string;
+    const director = formData.get("director") as string;
+    const phone = formData.get("phone") as string;
+    const rs = formData.get("rs") as string;
+    const mfo = formData.get("mfo") as string;
+    const bankAddress = formData.get("bankAddress") as string;
+    const bank = formData.get("bank") as string;
+    const address = formData.get("address") as string;
+    const accountant = formData.get("accountant") as string;
+    const accountantPhone = formData.get("accountantPhone") as string;
+
     await prisma.supplier.create({
-      data: { name: name.trim(), currency: currency || "UZS" }
+      data: { 
+        name: name.trim(), 
+        currency: currency || "UZS",
+        inn: inn?.trim() || null,
+        director: director?.trim() || null,
+        phone: phone?.trim() || null,
+        rs: rs?.trim() || null,
+        mfo: mfo?.trim() || null,
+        bankAddress: bankAddress?.trim() || null,
+        bank: bank?.trim() || null,
+        address: address?.trim() || null,
+        accountant: accountant?.trim() || null,
+        accountantPhone: accountantPhone?.trim() || null,
+      }
     });
 
     return NextResponse.redirect(new URL("/admin/suppliers", baseUrl));

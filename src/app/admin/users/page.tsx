@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
+import Modal from "@/components/Modal";
 
 const prisma = new PrismaClient();
 
@@ -29,10 +30,7 @@ export default async function AdminUsersPage() {
         <div style={{ background: "white", padding: "24px", borderRadius: "12px", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
              <h2 style={{ fontSize: "1.25rem", color: "#1e293b", margin: 0 }}>Сотрудники</h2>
-             {/* Hidden adding form inside details */}
-             <details style={{ position: "relative" }}>
-               <summary style={{ background: "#2563eb", color: "white", padding: "10px 16px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", listStyle: "none" }}>+ Добавить</summary>
-               <div style={{ position: "absolute", right: 0, top: "100%", marginTop: "8px", background: "white", padding: "24px", borderRadius: "12px", boxShadow: "0 10px 15px rgba(0,0,0,0.1)", border: "1px solid #e2e8f0", zIndex: 10, width: "320px" }}>
+             <Modal title="Зарегистрировать сотрудника" triggerText="+ Добавить">
                   <form action="/api/admin/users" method="POST" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                     <div>
                       <label style={{ display: "block", fontSize: "14px", color: "#64748b", marginBottom: "4px" }}>Номер телефона</label>
@@ -68,12 +66,11 @@ export default async function AdminUsersPage() {
                       Паролем автоматически станут <b>последние 4 цифры</b>.
                     </div>
 
-                    <button type="submit" style={{ background: "#2563eb", color: "white", padding: "12px", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>
+                    <button type="submit" style={{ background: "#2563eb", color: "white", padding: "12px", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", marginTop: "8px" }}>
                       Зарегистрировать
                     </button>
                   </form>
-               </div>
-             </details>
+             </Modal>
           </div>
 
           <table style={{ width: "100%", borderCollapse: "collapse" }}>

@@ -9,10 +9,16 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "super-sec
 export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get("auth_token")?.value;
-    if (!token) return NextResponse.redirect(new URL("/login", req.url));
+    const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+    const proto = req.headers.get("x-forwarded-proto") || "http";
+    const baseUrl = `${proto}://${host}`;
+
+    if (!token) return NextResponse.redirect(new URL("/login", baseUrl));
 
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    if (payload.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (payload.role !== "ADMIN" && payload.role !== "FOUNDER") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const formData = await req.formData();
     const phoneNum = formData.get("phone") as string;
@@ -38,9 +44,7 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    const successUrl = req.nextUrl.clone();
-    successUrl.pathname = "/admin/users";
-    return NextResponse.redirect(successUrl);
+    return NextResponse.redirect(new URL("/admin/users", baseUrl));
   } catch (error) {
     console.error("User creation error:", error);
     return NextResponse.json({ error: "Error" }, { status: 500 });

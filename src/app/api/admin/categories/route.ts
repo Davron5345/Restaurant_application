@@ -8,7 +8,11 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "super-sec
 export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get("auth_token")?.value;
-    if (!token) return NextResponse.redirect(new URL("/login", req.url));
+    const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+    const proto = req.headers.get("x-forwarded-proto") || "http";
+    const baseUrl = `${proto}://${host}`;
+
+    if (!token) return NextResponse.redirect(new URL("/login", baseUrl));
 
     const { payload } = await jwtVerify(token, JWT_SECRET);
     if (payload.role !== "ADMIN" && payload.role !== "FOUNDER" && payload.role !== "MANAGER") {
@@ -20,8 +24,7 @@ export async function POST(req: NextRequest) {
     const type = formData.get("type") as string;
 
     if (!name || name.trim() === "") {
-        const errUrl = req.nextUrl.clone();
-        errUrl.pathname = "/admin/categories";
+        const errUrl = new URL("/admin/categories", baseUrl);
         errUrl.searchParams.set("error", "invalid");
         return NextResponse.redirect(errUrl);
     }
@@ -30,9 +33,7 @@ export async function POST(req: NextRequest) {
       data: { name: name.trim(), type: type }
     });
 
-    const successUrl = req.nextUrl.clone();
-    successUrl.pathname = "/admin/categories";
-    return NextResponse.redirect(successUrl);
+    return NextResponse.redirect(new URL("/admin/categories", baseUrl));
   } catch (error) {
     return NextResponse.json({ error: "Error" }, { status: 500 });
   }

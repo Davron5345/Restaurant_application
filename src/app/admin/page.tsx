@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminReportsPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get("auth_token")?.value;
-  if (!token) return <div style={{ padding: "24px" }}>Доступ запрещен. Пожалуйста, войдите в систему.</div>;
+  if (!token) return <div style={{ padding: "24px" }}>Доступ запрещен</div>;
 
   let transactions: any[] = [];
   let branches: any[] = [];
@@ -15,7 +15,7 @@ export default async function AdminReportsPage() {
   try {
     transactions = await prisma.transaction.findMany({
       orderBy: { date: "desc" },
-      take: 100,
+      take: 200,
       include: { branch: true }
     });
     branches = await prisma.branch.findMany({
@@ -31,6 +31,9 @@ export default async function AdminReportsPage() {
       </div>
     );
   }
+
+  const totalIncome = transactions.filter(t => t.type === "INCOME").reduce((s, t) => s + (t.amount || 0), 0);
+  const totalExpense = transactions.filter(t => t.type === "EXPENSE").reduce((s, t) => s + (t.amount || 0), 0);
 
   return (
     <div>
@@ -48,48 +51,68 @@ export default async function AdminReportsPage() {
       </div>
 
       <div style={{ background: "white", padding: "24px", borderRadius: "12px", boxShadow: "0 2px 4px rgba(0,0,0,0.05)", overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "700px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "900px" }}>
           <thead>
-            <tr style={{ background: "#f1f5f9", textAlign: "left" }}>
-              <th style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", color: "#64748b" }}>Дата</th>
-              <th style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", color: "#64748b" }}>Филиал</th>
-              <th style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", color: "#64748b" }}>Тип</th>
-              <th style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", color: "#64748b" }}>Статья</th>
-              <th style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", color: "#64748b" }}>От кого/Кому</th>
-              <th style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", color: "#64748b" }}>Сумма</th>
-              <th style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", color: "#64748b" }}>Комментарий</th>
+            <tr style={{ background: "#1e40af", textAlign: "left" }}>
+              <th style={{ padding: "10px 12px", color: "white", fontSize: "13px", fontWeight: "600", borderRight: "1px solid #3b82f6", whiteSpace: "nowrap" }}>№</th>
+              <th style={{ padding: "10px 12px", color: "white", fontSize: "13px", fontWeight: "600", borderRight: "1px solid #3b82f6", whiteSpace: "nowrap" }}>Дата</th>
+              <th style={{ padding: "10px 12px", color: "white", fontSize: "13px", fontWeight: "600", borderRight: "1px solid #3b82f6", whiteSpace: "nowrap" }}>Тип операции</th>
+              <th style={{ padding: "10px 12px", color: "white", fontSize: "13px", fontWeight: "600", borderRight: "1px solid #3b82f6" }}>Статья операции</th>
+              <th style={{ padding: "10px 12px", color: "white", fontSize: "13px", fontWeight: "600", borderRight: "1px solid #3b82f6" }}>От кого / Кому</th>
+              <th style={{ padding: "10px 12px", color: "white", fontSize: "13px", fontWeight: "600", borderRight: "1px solid #3b82f6", whiteSpace: "nowrap" }}>Приход сумма</th>
+              <th style={{ padding: "10px 12px", color: "white", fontSize: "13px", fontWeight: "600", borderRight: "1px solid #3b82f6", whiteSpace: "nowrap" }}>Расход сумма</th>
+              <th style={{ padding: "10px 12px", color: "white", fontSize: "13px", fontWeight: "600", borderRight: "1px solid #3b82f6" }}>Комментарии прихода</th>
+              <th style={{ padding: "10px 12px", color: "white", fontSize: "13px", fontWeight: "600" }}>Комментарии расхода</th>
             </tr>
           </thead>
           <tbody>
-            {transactions.map((t: any) => (
-              <tr key={t.id}>
-                <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>
+            {transactions.map((t: any, idx: number) => (
+              <tr key={t.id} style={{ background: idx % 2 === 0 ? "#fff" : "#f8fafc" }}>
+                <td style={{ padding: "8px 12px", borderBottom: "1px solid #e2e8f0", textAlign: "center", color: "#64748b", fontSize: "13px" }}>{idx + 1}</td>
+                <td style={{ padding: "8px 12px", borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap", fontSize: "13px" }}>
                   {t.date ? new Date(t.date).toLocaleDateString("ru-RU") : "-"}
                 </td>
-                <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>
-                  {t.branch?.name || "—"}
+                <td style={{ padding: "8px 12px", borderBottom: "1px solid #e2e8f0", fontSize: "13px" }}>
+                  {t.type === "INCOME" ? "Приход" : "Расход"}
                 </td>
-                <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>
-                  <span style={{ padding: "4px 8px", borderRadius: "12px", fontSize: "12px", background: t.type === "INCOME" ? "#dcfce7" : "#fee2e2", color: t.type === "INCOME" ? "#166534" : "#991b1b" }}>
-                    {t.type === "INCOME" ? "Приход" : "Расход"}
-                  </span>
+                <td style={{ padding: "8px 12px", borderBottom: "1px solid #e2e8f0", fontSize: "13px", fontWeight: "500" }}>{t.article || "-"}</td>
+                <td style={{ padding: "8px 12px", borderBottom: "1px solid #e2e8f0", fontSize: "13px" }}>{t.partner || ""}</td>
+                <td style={{ padding: "8px 12px", borderBottom: "1px solid #e2e8f0", fontSize: "13px", textAlign: "right", fontWeight: "600", color: "#10b981" }}>
+                  {t.type === "INCOME" ? (t.amount || 0).toLocaleString("ru-RU") : ""}
                 </td>
-                <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{t.article || "-"}</td>
-                <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0" }}>{t.partner || "-"}</td>
-                <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", fontWeight: "bold", color: t.type === "INCOME" ? "#10b981" : "#ef4444" }}>
-                  {(t.amount || 0).toLocaleString()} сум
+                <td style={{ padding: "8px 12px", borderBottom: "1px solid #e2e8f0", fontSize: "13px", textAlign: "right", fontWeight: "600", color: "#ef4444" }}>
+                  {t.type === "EXPENSE" ? (t.amount || 0).toLocaleString("ru-RU") : ""}
                 </td>
-                <td style={{ padding: "12px", borderBottom: "1px solid #e2e8f0", color: "#64748b", fontSize: "14px" }}>
-                  {t.comment || ""}
+                <td style={{ padding: "8px 12px", borderBottom: "1px solid #e2e8f0", fontSize: "13px", color: "#64748b" }}>
+                  {t.type === "INCOME" ? (t.comment || "") : ""}
+                </td>
+                <td style={{ padding: "8px 12px", borderBottom: "1px solid #e2e8f0", fontSize: "13px", color: "#64748b" }}>
+                  {t.type === "EXPENSE" ? (t.comment || "") : ""}
                 </td>
               </tr>
             ))}
             {transactions.length === 0 && (
               <tr>
-                <td colSpan={7} style={{ padding: "24px", textAlign: "center", color: "#94a3b8" }}>Операций пока нет</td>
+                <td colSpan={9} style={{ padding: "24px", textAlign: "center", color: "#94a3b8" }}>Операций пока нет</td>
               </tr>
             )}
           </tbody>
+          {transactions.length > 0 && (
+            <tfoot>
+              <tr style={{ background: "#1e40af" }}>
+                <td colSpan={5} style={{ padding: "10px 12px", color: "white", fontWeight: "bold", fontSize: "14px", textAlign: "right" }}>
+                  ИТОГО:
+                </td>
+                <td style={{ padding: "10px 12px", color: "#86efac", fontWeight: "bold", fontSize: "14px", textAlign: "right" }}>
+                  {totalIncome.toLocaleString("ru-RU")}
+                </td>
+                <td style={{ padding: "10px 12px", color: "#fca5a5", fontWeight: "bold", fontSize: "14px", textAlign: "right" }}>
+                  {totalExpense.toLocaleString("ru-RU")}
+                </td>
+                <td colSpan={2} style={{ padding: "10px 12px" }}></td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
     </div>

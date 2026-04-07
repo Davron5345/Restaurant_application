@@ -16,7 +16,6 @@ export default function CashRegisterClient({
   const [step, setStep] = useState<1 | 2>(1);
   const [date, setDate] = useState("");
   const [activeBranchId, setActiveBranchId] = useState(branches.length > 0 ? branches[0].id : "");
-  // Start/End balances are hardcoded for now, real calculation would require fetching from db based on activeBranchId
   const [startBalance, setStartBalance] = useState("0");
   const [endBalance, setEndBalance] = useState("0");
   const router = useRouter();
@@ -109,59 +108,105 @@ export default function CashRegisterClient({
   const incomeCategories = categories.filter(c => c.type === "INCOME");
   const expenseCategories = categories.filter(c => c.type === "EXPENSE");
 
+  const activeBranch = branches.find(b => b.id === activeBranchId);
+
   return (
     <>
-      <header className="header" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-           <h2 style={{ margin: 0, fontSize: "1.25rem" }}>Касса</h2>
-           {isAdmin && (
-             <Link href="/admin" style={{ background: "#f87171", color: "white", padding: "8px 16px", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>
-               ⬅ В админку
-             </Link>
-           )}
-        </div>
-        <div className="header-balances" style={{ flexWrap: 'wrap' }}>
-          <div className="balance-card" style={{ display: 'flex', gap: '8px', minWidth: '200px' }}>
-            <span style={{ whiteSpace: 'nowrap' }}>Филиал:</span>
+      {/* ===== TOP BAR ===== */}
+      <div style={{
+        position: "sticky", top: 0, zIndex: 100,
+        background: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)",
+        borderBottom: "1px solid #e2e8f0", padding: "12px 24px",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.05)"
+      }}>
+        {/* Row 1: Branch selector + balances + date + admin link */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap", marginBottom: "12px" }}>
+          
+          {/* Left: branch selector */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <label style={{ fontSize: "13px", color: "#64748b", fontWeight: 600, whiteSpace: "nowrap" }}>ФИЛИАЛ:</label>
             <select 
               value={activeBranchId} 
               onChange={e => setActiveBranchId(e.target.value)}
-              style={{ padding: "4px 8px", borderRadius: "6px", border: "none", outline: "none", background: "#f1f5f9", fontWeight: "bold", width: "100%" }}
+              style={{ padding: "6px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", background: "white", fontWeight: "bold", fontSize: "14px", minWidth: "140px" }}
             >
-              {branches.length === 0 && <option value="">Нет доступных филиалов</option>}
+              {branches.length === 0 && <option value="">Нет филиалов</option>}
               {branches.map(b => (
                 <option key={b.id} value={b.id}>{b.name.toUpperCase()}</option>
               ))}
             </select>
           </div>
-          <div className="balance-card">
-            <span>СНН:</span>
-            <strong>{formatNum(startBalance)} сум</strong>
+
+          {/* Center: balances */}
+          <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
+            <div>
+              <div style={{ fontSize: "11px", color: "#94a3b8", fontWeight: 600, textTransform: "uppercase" }}>СНН</div>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>{formatNum(startBalance)} сум</div>
+            </div>
+            <div>
+              <div style={{ fontSize: "11px", color: "#94a3b8", fontWeight: 600, textTransform: "uppercase" }}>СНК</div>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>{formatNum(endBalance)} сум</div>
+            </div>
           </div>
-          <div className="balance-card">
-            <span>СНК:</span>
-            <strong>{formatNum(endBalance)} сум</strong>
-          </div>
-          <div>
+
+          {/* Right: date + admin button */}
+          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
             <input 
               type="date" 
-              className="date-picker" 
               value={date} 
               onChange={e => setDate(e.target.value)} 
+              style={{ padding: "6px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "14px" }}
             />
+            {isAdmin && (
+              <Link href="/admin" style={{ background: "#3b82f6", color: "white", padding: "6px 14px", borderRadius: "8px", textDecoration: "none", fontWeight: 600, fontSize: "13px", whiteSpace: "nowrap" }}>
+                ⬅ Админка
+              </Link>
+            )}
           </div>
         </div>
 
-        <div className="stepper" style={{display: 'flex', gap: '8px'}}>
-          <button className={`step-btn ${step === 1 ? 'active' : ''}`} onClick={() => setStep(1)}><span className="num">1</span> Приход</button>
-          <button className={`step-btn ${step === 2 ? 'active' : ''}`} onClick={() => setStep(2)}><span className="num">2</span> Расход</button>
-          <button className="step-btn" style={{ marginLeft: 'auto', background: '#10b981', color: 'white', fontWeight: 'bold' }} onClick={handleSave}>
-            Записать
+        {/* Row 2: Step tabs + Save */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ display: "flex", gap: "4px", background: "#f1f5f9", padding: "4px", borderRadius: "10px" }}>
+            <button 
+              onClick={() => setStep(1)}
+              style={{
+                padding: "8px 20px", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: 600, fontSize: "14px",
+                background: step === 1 ? "#2563eb" : "transparent",
+                color: step === 1 ? "white" : "#64748b",
+                transition: "all 0.2s"
+              }}
+            >
+              ① Приход
+            </button>
+            <button 
+              onClick={() => setStep(2)}
+              style={{
+                padding: "8px 20px", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: 600, fontSize: "14px",
+                background: step === 2 ? "#2563eb" : "transparent",
+                color: step === 2 ? "white" : "#64748b",
+                transition: "all 0.2s"
+              }}
+            >
+              ② Расход
+            </button>
+          </div>
+          <button 
+            onClick={handleSave}
+            style={{
+              marginLeft: "auto", background: "#10b981", color: "white",
+              border: "none", borderRadius: "8px", padding: "8px 24px",
+              fontWeight: "bold", cursor: "pointer", fontSize: "14px",
+              boxShadow: "0 2px 4px rgba(16,185,129,0.3)"
+            }}
+          >
+            ✓ Записать
           </button>
         </div>
-      </header>
+      </div>
 
-      <main className="main-container">
+      {/* ===== MAIN TABLE ===== */}
+      <main style={{ maxWidth: "1100px", margin: "24px auto", padding: "0 24px" }}>
         {step === 1 && (
           <div className="table-container">
             <table>
@@ -169,16 +214,16 @@ export default function CashRegisterClient({
                 <tr>
                   <th style={{ width: '50px' }}>№</th>
                   <th style={{ width: '25%' }}>Статья</th>
-                  <th style={{ width: '25%' }}>От кого</th>
-                  <th style={{ width: '20%' }}>Сумма (сум)</th>
-                  <th style={{ width: '25%' }}>Комментарии</th>
+                  <th style={{ width: '20%' }}>От кого</th>
+                  <th style={{ width: '20%' }}>Сумма</th>
+                  <th style={{ width: '25%' }}>Комментарий</th>
                   <th style={{ width: '50px' }}></th>
                 </tr>
               </thead>
               <tbody>
                 {incomes.map((item, idx) => (
                   <tr key={item.id}>
-                    <td style={{ textAlign: 'center', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                    <td style={{ textAlign: 'center', color: '#94a3b8' }}>{idx + 1}</td>
                     <td>
                       <select value={item.article} onChange={(e) => {
                           const newArr = [...incomes];
@@ -216,16 +261,16 @@ export default function CashRegisterClient({
                 <tr>
                   <th style={{ width: '50px' }}>№</th>
                   <th style={{ width: '25%' }}>Статья</th>
-                  <th style={{ width: '25%' }}>Кому (Поставщик)</th>
-                  <th style={{ width: '20%' }}>Сумма (сум)</th>
-                  <th style={{ width: '25%' }}>Комментарии</th>
+                  <th style={{ width: '20%' }}>Кому / Поставщик</th>
+                  <th style={{ width: '20%' }}>Сумма</th>
+                  <th style={{ width: '25%' }}>Комментарий</th>
                   <th style={{ width: '50px' }}></th>
                 </tr>
               </thead>
               <tbody>
                 {expenses.map((item, idx) => (
                   <tr key={item.id}>
-                    <td style={{ textAlign: 'center', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                    <td style={{ textAlign: 'center', color: '#94a3b8' }}>{idx + 1}</td>
                     <td>
                       <select value={item.article} onChange={(e) => {
                           const newArr = [...expenses];
